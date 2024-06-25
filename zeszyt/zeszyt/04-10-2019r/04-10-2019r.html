@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+	<meta charset="utf-8">
+	<title>T: Konfiguracja sieciowa w linuxie ciąg dalszy</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&display=swap&subset=latin-ext" rel="stylesheet"/>
+	<link rel="stylesheet" href="..\..\stylesheets\notes.css" type="text/css"/>
+</head>
+<body>
+	<div class="topka"><a href="../../zeszyt.html" class="powrot">Powrót do Spisu Treści</a></div>
+	<div id="container">
+		<b>ifconfig</b> – polecenie konfigurujące interfejsy sieciowe w systemach Unix i Linux.</br>
+		Odpowiednie skrypty wykorzystują ifconfig do "podniesienia" (uruchomienia) interfejsów sieciowych podczas startowania systemu operacyjnego.</br>
+		Podczas dalszej pracy komputera polecenie to okazuje się potrzebne tylko przy debugowaniu lub tuningowaniu konfiguracji sieciowej.</br>
+		Podczas wyłączania systemu kolejny zestaw skryptów wykorzystuje ifconfig do "upuszczenia" (wyłączenia) interfejsów sieciowych.</br>
+		Dzieje się tak zawsze, jeżeli system jest prawidłowo zamykany.</br>
+		ifconfig jest narzędziem przestarzałym - nie pracuje w pełni poprawnie w obecnych środowiskach sieciowych.</br>
+		Z tego powodu stopniowo wypierany jest z zadań konfiguracji sieci na rzecz pakietu Ip route2.</br>
+		Zwykle prawo do wykorzystania polecenia ifconfig ma tylko superużytkownik (root).</br>
+		</br>
+		Jeśli argumenty nie zostaną podane, to polecenie ifconfig wyświetla status aktywnych interfejsów sieciowych: </br>
+		<b>brama:~# ifconfig</b></br>
+		Kiedy pojawi się pojedynczy argument interface, to wyświetlany jest status interfejsu przypisanego do tej nazwy (np. eth0, ppp0):</br>
+		</br>
+		<b>brama:~# ifconfig eth0</b></br>
+		Jeżeli wykorzystana zostanie opcja -a, to wyświetlony zostanie status wszystkich interfejsów a nawet tych, które są nieaktywne:</br>
+		</br>
+		<b>brama:~# ifconfig -a</b></br>
+		Jeżeli komputer posiada połączenie z Internetem poprzez protokół PPP oraz siecią lokalną opartą na Ethernecie, to efekt działania polecenia ifconfig przybiera następujący wygląd:</br>
+		</br>
+		<b>brama:~# ifconfig</b></br>
+		eth0 Link encap:Ethernet HWaddr 00:C0:DF:01:AE:3E</br>
+		inet addr:192.168.1.1  Bcast:192.168.1.255  Mask:255.255.255.0</br>
+	  UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</br>
+	  RX packets:169989 errors:0 dropped:0 overruns:0 frame:0</br>
+	  TX packets:166048 errors:0 dropped:0 overruns:0 carrier:0</br>
+	  collisions:0 txqueuelen:100</br>
+	  RX bytes:22121102 (21.0 MiB)  TX bytes:169321645 (161.4 MiB)</br>
+	  Interrupt:10 Base address:0x2000</br>
+		</br>
+		<b>lo Link encap:Local Loopback</b></br>
+	  inet addr:127.0.0.1  Mask:255.0.0.0</br>
+	  UP LOOPBACK RUNNING  MTU:16436  Metric:1</br>
+	  RX packets:12746 errors:0 dropped:0 overruns:0 frame:0</br>
+	  TX packets:12746 errors:0 dropped:0 overruns:0 carrier:0</br>
+	  collisions:0 txqueuelen:0</br>
+	  RX bytes:2400551 (2.2 MiB)  TX bytes:2400551 (2.2 MiB)</br>
+		</br>
+		<b>ppp0 Link encap:Point-to-Point Protocol</b></br>
+	  inet addr:172.28.125.14  P-t-P:172.28.4.5  Mask:255.255.255.255</br>
+	  UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1500  Metric:1</br>
+	  RX packets:11489 errors:231 dropped:0 overruns:0 frame:0</br>
+	  TX packets:10447 errors:0 dropped:0 overruns:0 carrier:0</br>
+	  collisions:0 txqueuelen:3</br>
+	  RX bytes:10934194 (10.4 MiB)  TX bytes:892596 (871.6 KiB)</br>
+		</br>
+		<iframe src="http://www.youtube.com/embed/L9Gz08Z5Psg" width="500" height="300" frameborder="0"></iframe></br>
+		<iframe src="http://www.youtube.com/embed/TsGOHtsJ-IA" width="500" height="300" frameborder="0"></iframe>
+	</div>
+</body>
+</html>

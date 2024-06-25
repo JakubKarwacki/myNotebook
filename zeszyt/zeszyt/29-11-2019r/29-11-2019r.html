@@ -1,0 +1,121 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>T: Konfiguracja grub</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&display=swap&subset=latin-ext" rel="stylesheet"/>
+	<link rel="stylesheet" href="..\..\stylesheets\notes.css" type="text/css"/>
+</head>
+<body>
+	<div class="topka"><a href="../../zeszyt.html" class="powrot">Powrót do Spisu Treści</a></div>
+	<div id="container">
+		<b>Pliki konfiguracyjne grub :</b></br>
+		<b>/etc/default/grub</b> - ścieżka do pierwszego pliku</br>
+		<b>/boot/grub/grub.cfg</b> - ścieżka do drugiego pliku</br>
+		</br>
+		<img src="29-11-2019r/rys1.png"></br>
+		<center>W rysunku powyżej ukazane zostały pliki z obu ścieżek</center></br>
+		</br>
+		<b>cat etc/passwd</b> - pokazanie zawartości pliku passwd</br>
+		<b>head</b> - wypisuje wybrane wiersze od góry pliku</br>
+		<b>tail</b> - wypisuje wybrane wiersze od dołu pliku</br>
+<pre>
+	uczen@oem-Lenovo-G500:/$ cat etc/passwd
+	root:x:0:0:root:/root:/bin/bash
+	daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+	bin:x:2:2:bin:/bin:/usr/sbin/nologin
+	sys:x:3:3:sys:/dev:/usr/sbin/nologin
+	sync:x:4:65534:sync:/bin:/bin/sync
+	games:x:5:60:games:/usr/games:/usr/sbin/nologin
+	man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+	lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+	mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+	news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+	uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+	proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+	www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+	backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+	list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+	irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+	gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+	nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+	systemd-network:x:100:102:systemd Network Management,,,:/run/systemd/netif:/usr/sbin/nologin
+	systemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd/resolve:/usr/sbin/nologin
+	syslog:x:102:106::/home/syslog:/usr/sbin/nologin
+	messagebus:x:103:107::/nonexistent:/usr/sbin/nologin
+	_apt:x:104:65534::/nonexistent:/usr/sbin/nologin
+	uuidd:x:105:111::/run/uuidd:/usr/sbin/nologin
+	avahi-autoipd:x:106:112:Avahi autoip daemon,,,:/var/lib/avahi-autoipd:/usr/sbin/nologin
+	usbmux:x:107:46:usbmux daemon,,,:/var/lib/usbmux:/usr/sbin/nologin
+	dnsmasq:x:108:65534:dnsmasq,,,:/var/lib/misc:/usr/sbin/nologin
+	rtkit:x:109:114:RealtimeKit,,,:/proc:/usr/sbin/nologin
+	speech-dispatcher:x:110:29:Speech Dispatcher,,,:/var/run/speech-dispatcher:/bin/false
+	whoopsie:x:111:117::/nonexistent:/bin/false
+	kernoops:x:112:65534:Kernel Oops Tracking Daemon,,,:/:/usr/sbin/nologin
+	saned:x:113:119::/var/lib/saned:/usr/sbin/nologin
+	pulse:x:114:120:PulseAudio daemon,,,:/var/run/pulse:/usr/sbin/nologin
+	avahi:x:115:122:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/usr/sbin/nologin
+	colord:x:116:123:colord colour management daemon,,,:/var/lib/colord:/usr/sbin/nologin
+	hplip:x:117:7:HPLIP system user,,,:/var/run/hplip:/bin/false
+	geoclue:x:118:124::/var/lib/geoclue:/usr/sbin/nologin
+	gnome-initial-setup:x:119:65534::/run/gnome-initial-setup/:/bin/false
+	gdm:x:120:125:Gnome Display Manager:/var/lib/gdm3:/bin/false
+	oem:x:29999:29999:OEM Configuration (temporary user),,,:/home/oem:/bin/bash
+	uczen:x:1000:1000:uczen,,,:/home/uczen:/bin/bash
+	uczen1:x:1001:1001:uczen1,,,:/home/uczen1:/bin/bash
+</pre>
+<pre>
+	uczen@oem-Lenovo-G500:/$ tail etc/passwd
+	pulse:x:114:120:PulseAudio daemon,,,:/var/run/pulse:/usr/sbin/nologin
+	avahi:x:115:122:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/usr/sbin/nologin
+	colord:x:116:123:colord colour management daemon,,,:/var/lib/colord:/usr/sbin/nologin
+	hplip:x:117:7:HPLIP system user,,,:/var/run/hplip:/bin/false
+	geoclue:x:118:124::/var/lib/geoclue:/usr/sbin/nologin
+	gnome-initial-setup:x:119:65534::/run/gnome-initial-setup/:/bin/false
+	gdm:x:120:125:Gnome Display Manager:/var/lib/gdm3:/bin/false
+	oem:x:29999:29999:OEM Configuration (temporary user),,,:/home/oem:/bin/bash
+	uczen:x:1000:1000:uczen,,,:/home/uczen:/bin/bash
+	<b>uczen1:x:1001:1001:uczen1,,,:/home/uczen1:/bin/bash</b>
+
+	uczen@oem-Lenovo-G500:/$ tail -2  etc/passwd
+	uczen:x:1000:1000:uczen,,,:/home/uczen:/bin/bash
+	<b>uczen1:x:1001:1001:uczen1,,,:/home/uczen1:/bin/bash</b>
+
+	uczen@oem-Lenovo-G500:/$ head  etc/passwd
+	root:x:0:0:root:/root:/bin/bash
+	daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+	bin:x:2:2:bin:/bin:/usr/sbin/nologin
+	sys:x:3:3:sys:/dev:/usr/sbin/nologin
+	sync:x:4:65534:sync:/bin:/bin/sync
+	games:x:5:60:games:/usr/games:/usr/sbin/nologin
+	man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+	lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+	mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+	news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+
+	uczen@oem-Lenovo-G500:/$ head -2  etc/passwd
+	root:x:0:0:root:/root:/bin/bash
+	daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+	<table border body=1>
+		<tr><td>uczen1:</td><td>x</td><td>1001</td><td>1001</td><td>:uczen1</td><td>/home/uczen1:/bin/bash</td></tr>
+	</table>
+	Informacja z jednego pliku została pokazana w drugim.
+	Oznacza to iż został zastosowany link symboliczny
+
+	uczen@oem-Lenovo-G500:~/29-11-2019$ ln -s f n
+	uczen@oem-Lenovo-G500:~/29-11-2019$ ls -l
+	total 288
+	drwxr-xr-x 2 uczen uczen   4096 lis 29 12:55 1
+	-rw-rw-r-- 1 uczen uczen   4515 lis 29 12:42 29-11-2019.html
+	drwxr-xr-x 2 uczen uczen   4096 lis 29 12:52 a
+	drwxr-xr-x 2 uczen uczen   4096 lis 29 12:52 b
+	drwxr-xr-x 2 uczen uczen   4096 lis 29 12:52 c
+	drwxr-xr-x 2 uczen uczen   4096 lis 29 12:52 d
+	drwxr-xr-x 2 uczen uczen   4096 lis 29 12:52 e
+	lrwxrwxrwx 1 uczen uczen      1 lis 29 12:56 n -> f
+	-rw-rw-r-- 1 uczen uczen 260688 lis 29 11:45 Rys1_29-11-2019.png
+	-rw-r--r-- 1 uczen uczen      0 lis 29 12:53 x
+	-rw-r--r-- 1 uczen uczen      0 lis 29 12:53 z
+</pre>
+	</div>
+<body>
+</html>

@@ -1,0 +1,61 @@
+body
+{
+	/* Background pattern from subtlepatterns.com */
+	background-image: url(imgs/email-pattern.png);
+	margin: 0;
+	padding: 0;
+}
+
+#content_container
+{
+	width: 700px;
+	height: 360px;
+	border: 3px solid #00cca3;
+	border-radius: 30px;
+	padding: 6px;
+	margin: 0 auto;
+	margin-top: 300px;
+	background-color: #ffffff;
+	-webkit-box-shadow: 0px 0px 8px 0px rgba(0, 204, 163);
+	-moz-box-shadow: 0px 0px 8px 0px rgba(0, 204, 163);
+	box-shadow: 0px 0px 8px 0px rgba(0, 204, 163);
+	overflow: auto;
+}
+
+#content_container::-webkit-scrollbar
+{
+	width: 0;
+	height: 0;
+}
+
+.lesson
+{
+	height: 50px;
+	margin: 5px;
+	border: 2px solid #d9d9d9;
+	border-radius: 10px;
+	outline: none;
+	font-family: 'Roboto Mono', monospace;
+	font-weight: bold;
+	letter-spacing: 2px;
+	font-size: 14px;
+	background-color: #f4f4f4;
+	color: black;
+	-webkit-box-shadow: 0px 4px 6px -4px rgba(0, 204, 163);
+	-moz-box-shadow: 0px 4px 6px -4px rgba(0, 204, 163);
+	box-shadow: 0px 4px 6px -4px rgba(0, 204, 163);
+}
+
+.lessons_numer
+{
+	display: inline-block;
+	margin: 16px 0;
+	margin-left: 40px;
+}
+
+.lessons_date
+{
+	display: inline-block;
+	margin: 16px 0;
+	margin-left: 40px;
+}
