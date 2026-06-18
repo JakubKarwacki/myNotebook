@@ -10,9 +10,9 @@ export default defineConfig({
       title: 'myNotebook',
       description:
         'Zeszyt z notatkami szkolnymi (Linux/sieci, 2019/2020) — przepisany 2026 na współczesny dev-doc voice.',
-      defaultLocale: 'pl',
+      defaultLocale: 'root',
       locales: {
-        pl: { label: 'Polski', lang: 'pl' },
+        root: { label: 'Polski', lang: 'pl' },
       },
       customCss: ['./src/styles/custom.css'],
       pagination: true,
