@@ -56,3 +56,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  smoke:
+    name: Smoke test (post-deploy)
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Wait for CDN propagation
+        run: sleep 30
+      - name: Run smoke test
+        run: bash scripts/smoke-test.sh https://jakubkarwacki.github.io/myNotebook

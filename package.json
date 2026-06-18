@@ -16,6 +16,7 @@
     "preview": "astro preview",
     "typecheck": "astro check",
     "check": "pnpm run typecheck && pnpm run build",
+    "smoke": "bash scripts/smoke-test.sh",
     "postinstall": "simple-git-hooks"
   },
   "dependencies": {
