@@ -1,0 +1,118 @@
+---
+title: Przypomnienie komend — wildcards, man, ps
+description: Wildcards w nazwach plików (?, *), strona pomocy man, listowanie procesów ps.
+sidebar:
+  order: 13
+originalDate: '2019-12-06'
+originalTitle: 'T: Przypomnienie podstawowych komendy w linuxie'
+---
+
+import { Image } from 'astro:assets'
+import commands1 from '~/assets/lekcje/13-przypomnienie-komend/commands-1.png'
+import commands2 from '~/assets/lekcje/13-przypomnienie-komend/commands-2.png'
+import commands3 from '~/assets/lekcje/13-przypomnienie-komend/commands-3.png'
+import commands4 from '~/assets/lekcje/13-przypomnienie-komend/commands-4.png'
+
+Krótkie powtórzenie przed świętami: wildcards, `man`, `ps`.
+
+## Wildcards w nazwach plików (glob patterns)
+
+Shell rozwija specjalne znaki w argumentach poleceń **zanim** te dotrą do programu — to
+*globbing*. Najważniejsze:
+
+| Wzorzec       | Co dopasowuje                                                |
+| ------------- | ------------------------------------------------------------ |
+| `?`           | Dokładnie jeden dowolny znak                                  |
+| `*`           | Zero lub więcej dowolnych znaków                              |
+| `[abc]`       | Jeden znak z zestawu                                          |
+| `[a-z]`       | Jeden znak z zakresu                                          |
+| `{foo,bar}`   | Każde słowo z listy (brace expansion)                         |
+| `**`          | Dowolne zagnieżdżenie katalogów (z `shopt -s globstar`)       |
+
+Przykłady:
+
+```bash
+ls -l ?           # pliki/foldery o 1-znakowej nazwie
+ls -l ??          # o 2-znakowej nazwie
+ls -l *.txt       # wszystkie pliki .txt w bieżącym katalogu
+ls -l ?.md        # pliki .md o 1-znakowej nazwie
+ls -l [abc]*.log  # pliki .log zaczynające się na a, b, lub c
+ls -l **/*.ts     # wszystkie .ts rekursywnie (po `shopt -s globstar`)
+cp file{,.bak}    # cp file file.bak (backup)
+```
+
+:::caution[Quote, gdy wildcard ma trafić do programu]
+Niektóre komendy chcą same interpretować wzorce (np. `find -name`, `rsync`, `grep`):
+
+```bash
+find . -name "*.log"          # OK — wzorzec trafia do find
+find . -name *.log            # ZŁE — shell rozwinie pierwszy match, find dostanie pojedynczą nazwę
+```
+:::
+
+## `man` — strona pomocy systemowej
+
+```bash
+man <komenda>             # otwórz manpage
+man 5 passwd              # konkretną sekcję (5 = formaty plików)
+man -k <fraza>            # przeszukaj nazwy/krótkie opisy (= apropos)
+man man                   # meta-manpage o komendzie man
+```
+
+Nawigacja w pager:
+- **spacja** — strona w dół
+- **b** — strona w górę
+- **/wzorzec** — szukaj w dół
+- **n / N** — następny / poprzedni match
+- **q** — wyjście
+
+Sekcje manpages:
+
+| Sekcja | Zawartość                                                |
+| ------ | -------------------------------------------------------- |
+| 1      | Polecenia użytkownika (`ls`, `cp`, `grep`)               |
+| 2      | Systemcalls (`open`, `read`, `mmap`)                     |
+| 3      | Funkcje biblioteki C (`printf`, `malloc`)                |
+| 4      | Pliki specjalne (urządzenia w `/dev`)                    |
+| 5      | Formaty plików konfiguracyjnych (`passwd`, `crontab`)    |
+| 6      | Gry                                                       |
+| 7      | Konwencje, makro-pakiety (`ascii`, `man-pages`)          |
+| 8      | Komendy administratora (`mount`, `iptables`)             |
+
+:::tip[Nowsze alternatywy]
+- **`tldr`** — community-driven, **dużo krótsze** przykłady użycia. `tldr tar`, `tldr ssh`
+- **`info`** — GNU info, bardziej rozbudowane manpages dla narzędzi GNU
+- **`-h` / `--help`** — szybki ekran pomocy bez pagera (większość komend)
+:::
+
+## `ps` — lista procesów
+
+`ps` (*process status*) — najbardziej zagmatwane API z historycznych powodów: ma składnię BSD,
+UNIX i GNU jednocześnie, więc te same flagi znaczą różne rzeczy w zależności od formy wywołania.
+
+Najczęstsze warianty:
+
+```bash
+ps                      # twoje procesy w bieżącym terminalu
+ps aux                  # WSZYSTKIE procesy w systemie, z user info (BSD-style)
+ps -ef                  # WSZYSTKIE procesy, full format (UNIX-style)
+ps -eLf                 # j.w. + threads
+ps aux --sort=-%mem     # sortowanie po memory desc
+ps aux | grep nginx     # filtruj
+pgrep -af nginx         # to samo, ale bez grep grep self
+```
+
+:::tip[2026: zamiast ps użyj tych]
+- **`htop`** — interaktywny, kolorowy, sortowanie po klawiszach
+- **`btop`** — j.w., ale ładniejszy, z grafem CPU/RAM/sieć/disk
+- **`procs`** — Rust-rewrite, ładny output domyślnie
+- **`pidof <komenda>`** — szybkie znalezienie PID-a
+- **`pgrep -f <wzorzec>`** — pgrep z full command line match
+:::
+
+## Załączniki — terminale
+
+<Image src={commands1} alt="Komendy — widok 1" />
+<Image src={commands2} alt="Komendy — widok 2" />
+<Image src={commands3} alt="Komendy — widok 3" />
+<Image src={commands4} alt="Komendy — widok 4" />

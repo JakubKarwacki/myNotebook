@@ -1,0 +1,74 @@
+---
+title: Konfiguracja sieciowa — ifconfig w praktyce
+description: Pogłębienie tematu ifconfig — komenda, opcje, wyjście dla eth0/lo/ppp0. Materiały wideo.
+sidebar:
+  order: 5
+originalDate: '2019-10-04'
+originalTitle: 'T: Konfiguracja sieciowa w linuxie ciąg dalszy'
+---
+
+Druga z trzech lekcji o sieci. W oryginale była głównie powtórką teorii o `ifconfig` z
+[lekcji 4](/lekcje/04-konfiguracja-sieciowa-linux/) plus materiały wideo.
+
+## Pełny przykład działania ifconfig
+
+Wariant typowy dla komputera z połączeniem PPP (modem) + LAN Ethernet:
+
+```text title="ifconfig — pełny output"
+eth0   Link encap:Ethernet  HWaddr 00:C0:DF:01:AE:3E
+       inet addr:192.168.1.1  Bcast:192.168.1.255  Mask:255.255.255.0
+       UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+       RX packets:169989 errors:0 dropped:0 overruns:0 frame:0
+       TX packets:166048 errors:0 dropped:0 overruns:0 carrier:0
+       collisions:0 txqueuelen:100
+       RX bytes:22121102 (21.0 MiB)  TX bytes:169321645 (161.4 MiB)
+       Interrupt:10 Base address:0x2000
+
+lo     Link encap:Local Loopback
+       inet addr:127.0.0.1  Mask:255.0.0.0
+       UP LOOPBACK RUNNING  MTU:16436  Metric:1
+       RX packets:12746 errors:0 dropped:0 overruns:0 frame:0
+       TX packets:12746 errors:0 dropped:0 overruns:0 carrier:0
+       collisions:0 txqueuelen:0
+       RX bytes:2400551 (2.2 MiB)  TX bytes:2400551 (2.2 MiB)
+
+ppp0   Link encap:Point-to-Point Protocol
+       inet addr:172.28.125.14  P-t-P:172.28.4.5  Mask:255.255.255.255
+       UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1500  Metric:1
+       RX packets:11489 errors:231 dropped:0 overruns:0 frame:0
+       TX packets:10447 errors:0 dropped:0 overruns:0 carrier:0
+       collisions:0 txqueuelen:3
+       RX bytes:10934194 (10.4 MiB)  TX bytes:892596 (871.6 KiB)
+```
+
+Czytanie outputu — pola, które warto rozumieć:
+
+- **HWaddr** — adres MAC (sprzętowy, 48-bitowy, format hex)
+- **inet addr** — przypisany adres IPv4
+- **Bcast** — adres broadcast podsieci
+- **Mask** — maska podsieci (długość prefixu wyrażona w postaci 255.x)
+- **MTU** — patrz [lekcja 4](/lekcje/04-konfiguracja-sieciowa-linux/#pojęcia-bazowe)
+- **RX/TX packets** — liczniki odebranych/wysłanych pakietów
+- **errors / dropped / overruns** — niezerowe wartości to objaw problemu (zła ramka, full buffer)
+
+## Materiały wideo
+
+<iframe
+  src="https://www.youtube.com/embed/L9Gz08Z5Psg"
+  width="100%"
+  height="315"
+  title="Konfiguracja sieciowa w Linuksie — materiał 1"
+  frameBorder="0"
+  loading="lazy"
+  allowFullScreen
+/>
+
+<iframe
+  src="https://www.youtube.com/embed/TsGOHtsJ-IA"
+  width="100%"
+  height="315"
+  title="Konfiguracja sieciowa w Linuksie — materiał 2"
+  frameBorder="0"
+  loading="lazy"
+  allowFullScreen
+/>

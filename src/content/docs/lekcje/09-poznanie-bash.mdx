@@ -1,0 +1,102 @@
+---
+title: Poznanie powłoki Bash
+description: Operacje na plikach, instrukcja case w Bashu, krótkie wprowadzenie do BASH-a.
+sidebar:
+  order: 9
+originalDate: '2019-11-08'
+originalTitle: 'T: Poznanie powłoki Bash'
+---
+
+import { Image } from 'astro:assets'
+import bashPrompt from '~/assets/lekcje/09-poznanie-bash/bash-prompt.png'
+
+## Operacje na plikach i katalogach
+
+```bash
+touch plik.txt          # utwórz pusty plik (lub odśwież mtime, jeśli istnieje)
+pwd                     # print working directory
+cd ~                    # do katalogu domowego (~ = $HOME)
+mkdir nowy_folder       # utwórz katalog
+mkdir -p a/b/c          # utwórz drzewo (pominę istniejące poziomy)
+rm plik                 # usuń plik
+rm -r katalog           # usuń katalog rekurencyjnie
+rmdir pusty             # usuń pusty katalog (bezpieczniejsze niż rm -r)
+```
+
+## Uruchamianie skryptów i edycja
+
+```bash
+bash skrypt.sh          # uruchom skrypt przez bash
+./skrypt.sh             # uruchom z shebang (#!/bin/bash) — potrzebny +x bit
+nano plik               # prosty edytor TUI
+read x                  # czytaj jedną linię z stdin do zmiennej x
+```
+
+## Czym jest Bash
+
+**Bash** (*Bourne Again SHell*) — interpreter poleceń stworzony przez **Briana Foxa** w 1989 dla
+projektu GNU. Następca historycznej powłoki `sh` Stephena Bourne'a. Zawiera ulepszenia z `ksh`
+(Korn shell) i `csh` (C shell): historię poleceń, edycję linii, kontrolę zadań, arytmetykę.
+
+Jest **domyślną powłoką** w większości dystrybucji Linuksa (Ubuntu od dawna używa `dash` jako `/bin/sh`,
+ale shell loginu `/bin/bash`). Bash to też **język skryptowy** — pełny Turing-complete, używany
+do automatyzacji od cron jobs po deployment scripts.
+
+:::note[2026: alternatywy do Bash]
+W kontekście shella loginowego Bash wciąż króluje, ale:
+- **Zsh** — popularny w macOS (domyślny od 2019) i wśród developerów (oh-my-zsh, p10k theme)
+- **Fish** — friendly user shell, świetny autosuggest, ale niezgodny z `sh`
+- **Nushell** — eksperymentalna, structured data zamiast tekstu
+
+Dla **skryptów portable** standardem jest `#!/usr/bin/env bash` + `set -euo pipefail`.
+:::
+
+<Image src={bashPrompt} alt="Bash prompt — przykład wyglądu" />
+
+## Instrukcja `case` — wybór wielowariantowy
+
+`case` to konstrukcja Basha do dopasowywania zmiennej do wzorca — kompaktowa alternatywa dla
+łańcucha `if / elif / elif / else`.
+
+```bash
+case "$zmienna" in
+    "wzorzec1") polecenie1 ;;
+    "wzorzec2") polecenie2 ;;
+    "wzorzec3") polecenie3 ;;
+    *) polecenie_domyślne ;;
+esac
+```
+
+Wzorce mogą być glob-pattern (`*.txt`), regex-em rozszerzonym (w Bashu) lub union (`a|b|c`).
+Każdy blok kończy `;;` (terminator). Domyślny przypadek to `*)` na końcu.
+
+### Przykład — dzień tygodnia
+
+```bash title="dzien.sh"
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Podaj cyfrę dnia tygodnia (1-7):"
+read -r d
+
+case "$d" in
+    1) echo "Poniedziałek" ;;
+    2) echo "Wtorek" ;;
+    3) echo "Środa" ;;
+    4) echo "Czwartek" ;;
+    5) echo "Piątek" ;;
+    6) echo "Sobota" ;;
+    7) echo "Niedziela" ;;
+    *) echo "Niepoprawna wartość: '$d'" >&2; exit 1 ;;
+esac
+```
+
+Wywołanie:
+
+```bash
+chmod +x dzien.sh
+./dzien.sh
+```
+
+Skrypt czyta cyfrę przez `read`, dopasowuje do wzorca i wypisuje nazwę dnia. Jeśli użytkownik
+poda coś innego niż 1-7, gałąź `*)` zwraca błąd na stderr i kończy skrypt z exit code 1.

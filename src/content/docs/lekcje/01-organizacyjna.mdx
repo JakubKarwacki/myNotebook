@@ -1,0 +1,74 @@
+---
+title: Lekcja organizacyjna — czym jest GNU/Linux
+description: Wprowadzenie do GNU/Linuxa, ruchu wolnego oprogramowania i pierwsze komendy w terminalu.
+sidebar:
+  order: 1
+originalDate: '2019-09-06'
+originalTitle: 'T: Lekcja Organizacyjna'
+---
+
+import { Image } from 'astro:assets'
+import installLanguage from '~/assets/lekcje/01-organizacyjna/install-language.png'
+import installPrep from '~/assets/lekcje/01-organizacyjna/install-prep.png'
+
+Pierwsza lekcja semestru — kontekst historyczny i pierwsze komendy.
+
+## Skąd się wziął Linux
+
+**Richard Stallman** — programista, założyciel [Free Software Foundation](https://www.fsf.org/) i autor
+projektu **GNU** (1983). Idea: stworzyć kompletny uniksopodobny system operacyjny zbudowany wyłącznie
+z wolnego oprogramowania. Do końca lat 80. większość komponentów GNU była gotowa — brakowało jądra.
+
+**Linus Torvalds** wypuścił pierwsze publiczne wydanie jądra **Linux** **25 sierpnia 1991** roku (mailing
+list [comp.os.minix](https://en.wikipedia.org/wiki/Comp.os.minix)). W połączeniu z narzędziami GNU
+powstała kompletna platforma, którą dziś nazywamy GNU/Linuxem (lub potocznie po prostu Linuxem).
+
+Cała baza kodu — od jądra po userland — jest na licencjach typu GPL/MIT/BSD. Oznacza to wolność użycia,
+modyfikacji i redystrybucji bez opłat licencyjnych.
+
+## Trzy pierwsze komendy
+
+Komendy nawigacji po systemie plików — fundament pracy z terminalem.
+
+```bash title="Terminal"
+ls          # wylistuj zawartość bieżącego katalogu
+ls -la      # długi format + ukryte pliki (zaczynające się od kropki)
+
+pwd         # print working directory — wypisz ścieżkę bieżącego katalogu
+
+cd ..       # przejdź jeden katalog wyżej
+cd ~        # przejdź do katalogu domowego (alias: cd bez argumentu)
+cd -        # wróć do poprzedniego katalogu
+```
+
+## Instalacja Ubuntu Desktop w VirtualBox
+
+Standardowa instalacja z obrazu ISO. Najważniejsze kroki:
+
+<Image src={installLanguage} alt="Wybór języka instalacji" />
+
+Wybór języka. Polskie tłumaczenie installera jest kompletne.
+
+<Image src={installPrep} alt="Przygotowanie do instalacji" />
+
+Ekran wyboru typu instalacji — najczęściej *Erase disk and install Ubuntu* w przypadku świeżego dysku VM.
+W produkcyjnej maszynie warto skonfigurować partycje ręcznie (`/`, `/home`, swap).
+
+:::note[Uzupełnienie 2026]
+W 2026 standardem dla nowych instalacji jest **Btrfs** lub **ZFS** z snapshots zamiast tradycyjnego ext4.
+Ubuntu domyślnie nadal proponuje ext4 dla `/`, ale instalator oferuje ZFS jako opcję eksperymentalną.
+:::
+
+## Materiały wideo
+
+W oryginalnej lekcji był embed do tutoriala instalacji Linuksa na VirtualBox:
+
+<iframe
+  src="https://www.youtube.com/embed/9sJUDx7iEJw"
+  width="100%"
+  height="315"
+  title="Instalacja Linux Desktop na VirtualBox"
+  frameBorder="0"
+  loading="lazy"
+  allowFullScreen
+/>

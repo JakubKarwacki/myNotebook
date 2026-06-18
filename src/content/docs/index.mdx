@@ -1,0 +1,30 @@
+---
+title: O notatkach
+description: Notatki z technikum z lat 2019/2020 — Linux i sieci, przepisane 2026 na współczesny dev-doc voice.
+template: doc
+hero:
+  tagline: Notatki z technikum (Linux & sieci, 2019/2020) — przepisane 2026.
+  actions:
+    - text: Zacznij od lekcji 1
+      link: /lekcje/01-organizacyjna/
+      icon: right-arrow
+      variant: primary
+---
+
+## O czym to jest
+
+Czternaście lekcji z drugiej klasy technikum informatycznego (semestr zimowy 2019/2020) — administracja Linuxem,
+konfiguracja sieci, podstawy Bash, GRUB. Oryginalnie napisane jako statyczne pliki HTML z jQuery dla
+spisu treści. W 2026 wszystko przepisałem na Starlight: MDX, jasny/ciemny theme, search, mobile responsive.
+
+## Co zostało zachowane, co zmienione
+
+Tematyka i kolejność lekcji są takie same. Treść została **przepisana na współczesny dev-doc voice** — z poprawionymi
+literówkami, zmodernizowanymi komendami (`ifconfig` → `ip`, etc.) i lepszą strukturą sekcji. Oryginalne pliki HTML
+zachowane na branchu [`archive-2019`](https://github.com/JakubKarwacki/myNotebook/tree/archive-2019) dla referencji.
+
+## Stack
+
+[Astro](https://astro.build) 6 + [Starlight](https://starlight.astro.build) 0.40 + MDX + Pagefind search.
+Deploy: GitHub Pages tag-driven. Source na [GitHubie](https://github.com/JakubKarwacki/myNotebook) (proprietary
+license, repo zamknięte na contributions).

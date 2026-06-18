@@ -1,0 +1,217 @@
+---
+title: Testy podsumowujące + konfiguracja IP w Ubuntu
+description: Quiz utrwalający z katalogów, typów plików, uprawnień i powłok. Konfiguracja IP w nowoczesnym Ubuntu (netplan + /etc/network/interfaces).
+sidebar:
+  order: 14
+originalDate: '2020-02-28'
+originalTitle: 'T: Testy linux'
+---
+
+import { Image } from 'astro:assets'
+import interfacesImg from '~/assets/lekcje/14-testy-linux/interfaces.png'
+import netplanImg from '~/assets/lekcje/14-testy-linux/netplan.png'
+
+Ostatnia lekcja semestru — quiz powtórkowy + praktyczny przewodnik po statycznej konfiguracji IP
+w Ubuntu (`netplan` i `/etc/network/interfaces`).
+
+## Quiz — katalogi systemowe
+
+| Katalog | Zawartość                                                                 |
+| ------- | ------------------------------------------------------------------------- |
+| `/`     | Katalog główny systemu                                                    |
+| `/bin`  | Podstawowe wykonywalne pliki dla wszystkich użytkowników                  |
+| `/sbin` | Wykonywalne pliki tylko dla administratora                                |
+| `/boot` | Jądro + bootloader (GRUB)                                                 |
+| `/dev`  | Pliki specjalne reprezentujące urządzenia                                 |
+| `/etc`  | Pliki konfiguracyjne systemu                                              |
+| `/home` | Katalogi domowe użytkowników                                              |
+| `/lib`  | Współdzielone biblioteki + moduły jądra (`/lib/modules`)                  |
+| `/mnt`  | Punkt montowania dodatkowych dysków (np. partycji Windows)                |
+| `/proc` | Wirtualny FS — info o procesach                                           |
+| `/root` | Katalog domowy roota                                                      |
+| `/sys`  | Wirtualny FS — interfejs do urządzeń i kernel                             |
+| `/tmp`  | Pliki tymczasowe                                                          |
+| `/usr`  | Dodatkowe oprogramowanie (analog Program Files w Windows)                 |
+| `/var`  | Logi, kolejki, pliki serwowane (np. `/var/www/`, `/var/log/`)             |
+
+## Quiz — rodzaje plików (z `ls -l`)
+
+| Pierwszy znak | Typ                                                                        |
+| ------------- | -------------------------------------------------------------------------- |
+| `-`           | Plik zwykły                                                                |
+| `d`           | Katalog                                                                    |
+| `l`           | Dowiązanie symboliczne                                                     |
+| `b`           | Urządzenie blokowe (dysk, partycja — dostęp blokami)                       |
+| `c`           | Urządzenie znakowe (terminal, mysz — dostęp bajt po bajcie)                |
+| `s`           | Gniazdo (socket) — IPC między procesami                                    |
+| `p`           | Nazwany potok (named pipe / FIFO)                                          |
+
+## Quiz — urządzenia w `/dev` (legacy)
+
+W systemach z lat 90./2000. urządzenia miały sztywne nazewnictwo:
+
+| Plik             | Co to                                                |
+| ---------------- | ---------------------------------------------------- |
+| `/dev/hda`       | Pierwszy dysk IDE                                    |
+| `/dev/hda1`      | Pierwsza partycja pierwszego dysku IDE               |
+| `/dev/hdb`       | Drugi dysk IDE                                       |
+| `/dev/fd0`       | Pierwsza dyskietka                                   |
+| `/dev/lp0`       | Pierwszy port drukarki (LPT)                         |
+| `/dev/mouse`     | Mysz szeregowa                                       |
+| `/dev/console`   | Konsola OS                                           |
+| `/dev/null`      | Urządzenie puste (do testów / odrzucenia outputu)    |
+
+W 2026 IDE to historia. Współczesne nazewnictwo:
+
+- `/dev/sda`, `/dev/sdb` — dyski SATA/USB (od `s` jak SCSI)
+- `/dev/nvme0n1` — dyski NVMe (`p1`, `p2` dla partycji: `/dev/nvme0n1p1`)
+- `/dev/null`, `/dev/zero`, `/dev/random`, `/dev/urandom` — wciąż istnieją i są standardowe
+
+## Quiz — powłoki systemowe
+
+| Powłoka | Pełna nazwa              | Autor / kontekst                                      |
+| ------- | ------------------------ | ----------------------------------------------------- |
+| `sh`    | Bourne shell             | Stephen Bourne, AT&T Bell Labs, 1977                  |
+| `csh`   | C shell                  | Bill Joy, 1978 — składnia inspirowana C               |
+| `tcsh`  | Enhanced C shell         | Rozszerzenie csh                                      |
+| `ksh`   | Korn shell               | David Korn, AT&T Bell Labs — kompatybilny z sh + features csh |
+| `rsh`   | Reduced shell            | Okrojona wersja sh                                    |
+| `bash`  | Bourne Again SHell       | Brian Fox, GNU, 1989 — **domyślna powłoka Linuksa**   |
+| `zsh`   | Z shell                  | Paul Falstad, 1990 — **domyślna macOS od 2019**       |
+| `fish`  | Friendly Interactive Shell | 2005 — UX-first, niezgodna z sh                     |
+
+## Quiz — uprawnienia (chmod oktalny)
+
+| Wartość | Uprawnienia | Notacja |
+| ------- | ----------- | ------- |
+| `0`     | brak        | `---`   |
+| `1`     | wykonanie   | `--x`   |
+| `2`     | zapis       | `-w-`   |
+| `3`     | zapis + wykonanie | `-wx` |
+| `4`     | odczyt      | `r--`   |
+| `5`     | odczyt + wykonanie | `r-x` |
+| `6`     | odczyt + zapis | `rw-` |
+| `7`     | odczyt + zapis + wykonanie | `rwx` |
+
+Trzy cyfry → user / group / others:
+
+```bash
+chmod 755 script.sh    # rwx r-x r-x — typowy executable
+chmod 644 file.txt     # rw- r-- r-- — typowy plik
+chmod 600 ~/.ssh/id_rsa # rw- --- --- — sekret (tylko user)
+chmod 700 ~/.ssh       # rwx --- --- — katalog prywatny
+```
+
+## Konfiguracja IP w Ubuntu
+
+> Ten rozdział to streszczenie tutorialu Damiana Stelmacha z portalu
+> [Pasja Informatyki](https://pasja-informatyki.pl/sieci-komputerowe/linux-ubuntu-server-konfiguracja-ip/),
+> który był pierwotnie cytowany w lekcji.
+
+W Ubuntu adres IP karty sieciowej można skonfigurować na trzy sposoby:
+
+1. **Podczas instalacji systemu** — installer pyta o tryb (DHCP / statyczny)
+2. **Doraźnie przez komendę** — `ip addr add ...` (nie przeżyje reboot)
+3. **Trwale w pliku konfiguracyjnym** — `netplan` (Ubuntu 17.10+) lub `/etc/network/interfaces` (starsze)
+
+### Sprawdzenie nazw interfejsów
+
+```bash
+ip a                  # lub: ifconfig -a (jeśli zainstalowane)
+```
+
+W VirtualBox karty zwykle nazywają się `enp0s3`, `enp0s8`, `enp0s9`, `enp0s10` (od kolejnego slotu PCI).
+
+### Konfiguracja doraźna
+
+```bash
+# Wariant stary (ifconfig):
+sudo ifconfig enp0s8 10.10.10.1 netmask 255.255.255.0 up
+
+# Wariant nowy (iproute2):
+sudo ip addr add 10.10.10.1/24 dev enp0s8
+sudo ip link set enp0s8 up
+```
+
+Po reboocie ustawienia znikają — to tylko do testów lub przed wpisaniem do pliku.
+
+### Trwała konfiguracja — `netplan` (Ubuntu 17.10+)
+
+Plik `/etc/netplan/50-cloud-init.yaml` (lub `00-installer-config.yaml`):
+
+```yaml title="/etc/netplan/50-cloud-init.yaml"
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: true
+    enp0s8:
+      dhcp4: false
+      addresses:
+        - 10.10.10.1/24
+      routes:
+        - to: default
+          via: 10.10.10.254
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+```
+
+Zastosowanie:
+
+```bash
+sudo netplan apply
+sudo netplan try        # próbne zastosowanie z auto-rollback po 120s
+```
+
+<Image src={netplanImg} alt="Konfiguracja netplan w edytorze" />
+
+:::caution[YAML jest wrażliwy na składnię]
+Pliki netplan są bardzo czułe na **wcięcia spacjami** (NIE tab) i poprawne odstępy.
+Drobny błąd składni → `netplan apply` failuje z mało pomocnym komunikatem.
+Najczęstsza pułapka: tabulatory zamiast spacji.
+
+Sprawdzenie składni przed apply:
+
+```bash
+sudo netplan generate
+sudo netplan get          # rendered effective config
+```
+:::
+
+### Trwała konfiguracja — `/etc/network/interfaces` (Ubuntu starsze niż 17.10)
+
+W starszym Ubuntu i Debianie konfiguracja siedzi w pliku ifupdown:
+
+```text title="/etc/network/interfaces"
+auto lo
+iface lo inet loopback
+
+auto enp0s8
+iface enp0s8 inet static
+    address 10.10.10.1
+    netmask 255.255.255.0
+    gateway 10.10.10.254
+    dns-nameservers 8.8.8.8 8.8.4.4
+```
+
+Zastosowanie (restart usługi):
+
+```bash
+sudo systemctl restart networking          # systemd
+sudo /etc/init.d/networking restart        # SysV (Ubuntu 14.x)
+```
+
+<Image src={interfacesImg} alt="Konfiguracja /etc/network/interfaces" />
+
+:::note[2026: NetworkManager wszędzie poza serverami]
+Na desktopowych Ubuntu standardem jest **NetworkManager** z `nmcli` lub `nmtui` — GUI/TUI
+nakładkami nad netplan / `/etc/network/interfaces`. Server-grade deployments wciąż używają
+netplan bezpośrednio dla deterministycznej konfiguracji.
+:::
+
+## Koniec semestru
+
+Czternaście lekcji za nami — od organizacyjnej (Stallman, GNU, Linus) przez sieci, Bash,
+GRUB, aż do statycznej konfiguracji IP. Daje to zestaw umiejętności do samodzielnej konfiguracji
+podstawowego Linux-server'a w sieci LAN.

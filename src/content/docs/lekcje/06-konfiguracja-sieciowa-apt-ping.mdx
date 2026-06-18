@@ -1,0 +1,75 @@
+---
+title: APT, sudo, ping — narzędzia podstawowe
+description: Menedżer pakietów APT, podnoszenie uprawnień przez sudo i diagnostyka połączeń z ping.
+sidebar:
+  order: 6
+originalDate: '2019-10-11'
+originalTitle: 'T: Konfiguracja sieciowa w linuxie ciąg dalszy'
+---
+
+Krótka lekcja o trzech narzędziach, które używasz w terminalu codziennie.
+
+## APT — menedżer pakietów Debiana/Ubuntu
+
+**APT** (*Advanced Package Tool*) zarządza instalacją, aktualizacją i usuwaniem pakietów `.deb`.
+Historycznie istnieją dwa frontendy do tej samej bazy:
+
+```bash
+apt        # nowoczesny user-friendly frontend (od 2014)
+apt-get    # starszy frontend stabilny pod skrypty
+```
+
+Najważniejsze komendy:
+
+```bash
+sudo apt update                # odśwież listę dostępnych pakietów
+sudo apt upgrade               # zainstaluj nowsze wersje już zainstalowanych pakietów
+sudo apt full-upgrade          # upgrade + obsłuż zmienione zależności
+sudo apt install <pakiet>      # zainstaluj
+sudo apt remove <pakiet>       # usuń (zostaw configi)
+sudo apt purge <pakiet>        # usuń + wyczyść configi
+sudo apt autoremove            # usuń pakiety, które nie są już potrzebne
+apt search <fraza>             # przeszukaj listę pakietów
+apt show <pakiet>              # pokaż metadata pakietu
+```
+
+:::tip[Nowoczesne alternatywy]
+W 2026 APT wciąż króluje w Debianie/Ubuntu, ale obok niego:
+- **`nala`** — ładniejszy frontend nad APT (paralelne pobieranie, lepsze UI)
+- **`snap`** — Canonical, sandboxed packages
+- **`flatpak`** — distribution-agnostic, sandboxed
+- **`apt-cacher-ng`** — proxy cache dla wielu maszyn w sieci LAN
+:::
+
+## sudo — kontrolowane podniesienie uprawnień
+
+`sudo` (*substitute user do*) pozwala wykonać polecenie jako inny użytkownik — domyślnie jako root.
+Konfiguracja jest w `/etc/sudoers` (edytować przez `visudo`, **nie** bezpośrednio):
+
+```bash
+sudo apt install nginx         # uruchom apt jako root
+sudo -u www-data ls /var/www   # uruchom jako konkretny user
+sudo -i                        # interaktywny shell jako root
+sudo !!                        # powtórz poprzednią komendę z sudo (przydatne!)
+```
+
+Po wpisaniu hasła `sudo` cache'uje je przez ~15 minut (konfigurowalne), więc kolejne wywołania
+nie wymagają ponownego podawania.
+
+## ping — diagnostyka połączenia
+
+```bash
+ping 8.8.8.8                   # wyślij pakiety ICMP echo do Google DNS
+ping -c 4 example.com          # ogranicz do 4 prób
+ping -i 0.2 -c 100 router      # 100 prób co 200ms (test pakietowy)
+ping6 ipv6.google.com          # IPv6 (w nowszych: `ping` auto-detect)
+```
+
+Output typu *64 bytes from ... time=12.3 ms* = sukces. Brak odpowiedzi = pakiety nie wracają
+(może być po stronie sieci, firewalla, samego host'a).
+
+:::note[ICMP może być filtrowany]
+Wiele firewalli **blokuje ICMP** mimo że host żyje. Brak odpowiedzi na ping nie jest dowodem
+że host nie działa. Lepsze testy: `curl -I https://host` (dla HTTP), `nc -zv host 22` (test
+konkretnego portu).
+:::

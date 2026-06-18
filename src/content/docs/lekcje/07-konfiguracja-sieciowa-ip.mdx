@@ -1,0 +1,65 @@
+---
+title: Konfiguracja sieciowa — pakiet ip
+description: Komendy z pakietu iproute2 — ip a, ip addr add, ip link set. Nowoczesny zamiennik ifconfig.
+sidebar:
+  order: 7
+originalDate: '2019-10-18'
+originalTitle: 'T: Konfiguracja sieciowa w linuxie ciąg dalszy'
+---
+
+Trzecia z trzech lekcji o sieci — tym razem nowocześniejszy zamiennik `ifconfig`: pakiet `iproute2`.
+
+## Tryb tekstowy systemu
+
+```text
+Ctrl + Alt + F3      # przełącz na konsolę TTY3
+Ctrl + Alt + F7      # wróć do trybu graficznego (X11/Wayland)
+```
+
+Konsole tekstowe `F1`–`F6` są zarezerwowane na osobne sesje terminala. To pozostałość z czasów,
+gdy serwery były często bez X11 — wciąż przydatne, gdy GUI się zawiesi.
+
+## Pakiet `iproute2`
+
+Współczesny standard zarządzania siecią w Linuksie. Komendy w pakiecie:
+
+| Komenda | Zastosowanie                                          |
+| ------- | ----------------------------------------------------- |
+| `ip`    | Konfiguracja interfejsów, adresów, routing, tunele    |
+| `ss`    | Statystyki socketów (zamiennik `netstat`)             |
+| `tc`    | Traffic control — QoS, throttling                      |
+| `bridge` | Zarządzanie bridge'ami                                |
+
+### `ip` — najczęstsze użycia
+
+```bash
+ip a                         # pokaż wszystkie interfejsy + adresy (= ip addr show)
+ip a s eth0                  # pokaż konkretny interfejs
+ip addr add 10.0.0.1/24 dev eth0     # dodaj adres do interfejsu
+ip addr del 10.0.0.1/24 dev eth0     # usuń adres
+ip link set eth0 up          # podnieś interfejs
+ip link set eth0 down        # opuść interfejs
+ip link set eth0 mtu 9000    # ustaw MTU (jumbo frames)
+ip route                     # tablica routingu
+ip route add default via 192.168.1.1   # dodaj domyślną bramę
+ip -6 a                      # wymuś tryb IPv6
+ip -br a                     # brief format (zwięzły, dobry do skryptów)
+```
+
+:::tip[Skróty]
+`ip` rozpoznaje skróty pierwsze litery aliasów, więc te są równoważne:
+```bash
+ip address show    # pełna forma
+ip addr show       # skrócona
+ip a s             # super-skrócona
+ip a               # ekstrahująca (= ip addr show)
+```
+:::
+
+## Co dalej
+
+W kolejnych lekcjach:
+
+- [Lekcja 8](/lekcje/08-konfiguracja-hosta/) — konfiguracja hosta przez DHCP (`isc-dhcp-server`)
+- [Lekcja 11](/lekcje/11-konfiguracja-sieciowa/) — DHCP + DNS w szczegółach
+- [Lekcja 14](/lekcje/14-testy-linux/) — netplan i statyczna konfiguracja IP w nowoczesnym Ubuntu

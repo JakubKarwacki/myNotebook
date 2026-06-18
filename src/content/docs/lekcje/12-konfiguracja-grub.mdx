@@ -1,0 +1,141 @@
+---
+title: Konfiguracja GRUB-a + /etc/passwd
+description: Bootloader GRUB — ścieżki konfiguracyjne, plik /etc/passwd, linki symboliczne, head i tail.
+sidebar:
+  order: 12
+originalDate: '2019-11-29'
+originalTitle: 'T: Konfiguracja grub'
+---
+
+import { Image } from 'astro:assets'
+import grubFiles from '~/assets/lekcje/12-konfiguracja-grub/grub-files.png'
+
+## GRUB — co to jest
+
+**GRUB** (*GRand Unified Bootloader*) — najczęściej używany bootloader na Linuksie. Jego zadanie:
+po POST-cie BIOS-u/UEFI załadować jądro Linuksa i przekazać mu kontrolę. W praktyce widzisz go
+jako menu wyboru systemu (np. Ubuntu / Ubuntu Recovery Mode / Windows).
+
+### Pliki konfiguracyjne
+
+| Plik                                | Co to                                                       |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `/etc/default/grub`                 | Plik edytowalny ręcznie — settings na wysokim poziomie      |
+| `/etc/grub.d/`                      | Skrypty generujące fragmenty configa (10_linux, 30_os-prober) |
+| `/boot/grub/grub.cfg`               | Wygenerowany plik z menu — **nie edytować ręcznie**         |
+| `/boot/grub/grubenv`                | Persistent env (np. `saved_entry`)                          |
+
+### Workflow modyfikacji
+
+```bash
+sudo nano /etc/default/grub      # zmień GRUB_TIMEOUT, GRUB_DEFAULT, GRUB_CMDLINE_LINUX
+sudo update-grub                 # regeneruj /boot/grub/grub.cfg
+```
+
+`update-grub` jest aliasem dla `grub-mkconfig -o /boot/grub/grub.cfg`. Skanuje `/etc/grub.d/*`,
+wykrywa zainstalowane jądra w `/boot/`, opcjonalnie wykrywa inne OS-y przez `os-prober`.
+
+<Image src={grubFiles} alt="Pliki konfiguracyjne GRUB-a w terminalu" />
+
+:::note[2026: systemd-boot i kernel command line]
+W systemach z UEFI alternatywą dla GRUB-a jest **systemd-boot** (lżejszy, prostszy config).
+Arch Linux i niektóre flavour Fedora go preferują. Cmdline jądra można zmienić runtime
+przez `kernelstub` (Pop!_OS) lub edycję `/boot/efi/loader/entries/*.conf`.
+:::
+
+## Plik `/etc/passwd`
+
+Plik konfiguracyjny systemu wymieniający wszystkich użytkowników (w tym systemowych daemonów).
+Każda linia to jeden user, pola separowane dwukropkami:
+
+```text
+nazwa:hash:uid:gid:GECOS:home:shell
+```
+
+Pola:
+
+1. **nazwa** — login użytkownika
+2. **hash** — historycznie hash hasła, dziś prawie zawsze `x` (hash jest w `/etc/shadow`, czytalnym
+   tylko dla root)
+3. **uid** — numer użytkownika (root = 0, systemowi typowo < 1000, ludzie ≥ 1000)
+4. **gid** — primary group ID
+5. **GECOS** — pełne imię/komentarz
+6. **home** — katalog domowy
+7. **shell** — domyślny shell loginu (`/bin/bash`, `/usr/sbin/nologin`, `/bin/false`)
+
+### Komendy `head`, `tail`, `cat`
+
+```bash
+cat /etc/passwd          # cały plik
+head /etc/passwd         # pierwsze 10 linii
+head -n 5 /etc/passwd    # pierwsze 5 linii
+tail /etc/passwd         # ostatnie 10 linii
+tail -n 2 /etc/passwd    # ostatnie 2 linie
+tail -f /var/log/syslog  # follow — nowe linie na żywo (do C-c)
+```
+
+Fragmenty z `/etc/passwd` w lab-VM:
+
+```text title="cat /etc/passwd (początek)"
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+```
+
+```text title="tail -2 /etc/passwd"
+uczen:x:1000:1000:uczen,,,:/home/uczen:/bin/bash
+uczen1:x:1001:1001:uczen1,,,:/home/uczen1:/bin/bash
+```
+
+Konta typu `www-data` z shellem `/usr/sbin/nologin` to **konta systemowe** — istnieją, by usługa
+(Apache, Nginx, MySQL) mogła działać pod nieuprzywilejowanym userem, ale **nie można się na nie
+zalogować** (shell wyświetla komunikat i kończy).
+
+## Linki symboliczne
+
+```bash
+ln -s f n                # utwórz link symboliczny `n` wskazujący na `f`
+ls -l n                  # n -> f
+readlink n               # pokaż cel linku
+unlink n                 # usuń link (= rm n, ale jaśniej)
+```
+
+Output `ls -l`:
+
+```text
+lrwxrwxrwx 1 uczen uczen 1 lis 29 12:56 n -> f
+```
+
+Pierwszy znak `l` w trybie = symlink. Wewnątrz mamy ścieżkę do celu (`f`). Symlink może wskazywać
+na nieistniejący plik (*dangling link*) — wtedy `ls -l` pokazuje go jako *broken*.
+
+:::tip[Hard link vs symlink]
+- **Hard link** (`ln bez -s`) — drugi wpis w directory wskazujący ten sam *inode*. Plik znika
+  dopiero, gdy usunie się ostatni hard link. Nie działa między różnymi filesystemami ani na katalogach.
+- **Symlink** (`ln -s`) — osobny mały plik trzymający ścieżkę do celu. Działa między FS, ale przestaje
+  działać jeśli target zostanie przeniesiony.
+:::
+
+## Pełny `ls -l` przykład
+
+```text
+total 288
+drwxr-xr-x 2 uczen uczen   4096 lis 29 12:55 1
+-rw-rw-r-- 1 uczen uczen   4515 lis 29 12:42 29-11-2019.html
+drwxr-xr-x 2 uczen uczen   4096 lis 29 12:52 a
+lrwxrwxrwx 1 uczen uczen      1 lis 29 12:56 n -> f
+-rw-rw-r-- 1 uczen uczen 260688 lis 29 11:45 Rys1_29-11-2019.png
+```
+
+Pola w wyniku `ls -l`:
+
+| Pole          | Co znaczy                                                                |
+| ------------- | ------------------------------------------------------------------------ |
+| `drwxr-xr-x`  | Typ (`d`=dir, `-`=plik, `l`=link) + uprawnienia (rwx × user/group/other) |
+| `2`           | Liczba hard linków                                                       |
+| `uczen uczen` | Właściciel + grupa                                                        |
+| `4096`        | Rozmiar w bajtach                                                        |
+| `lis 29 12:55`| Ostatnia modyfikacja                                                     |
+| `1`           | Nazwa pliku                                                              |

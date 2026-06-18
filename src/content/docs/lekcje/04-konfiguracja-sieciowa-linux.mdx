@@ -1,0 +1,72 @@
+---
+title: Konfiguracja sieciowa — wprowadzenie
+description: Wprowadzenie do interfejsów sieciowych w Linuksie, MTU i klasycznych komend (ifconfig).
+sidebar:
+  order: 4
+originalDate: '2019-09-27'
+originalTitle: 'T: Konfiguracja sieciowa w linuxie'
+---
+
+import { Image } from 'astro:assets'
+import ifconfigOutput from '~/assets/lekcje/04-konfiguracja-sieciowa-linux/ifconfig-output.png'
+
+Punkt startowy bloku trzech lekcji o konfiguracji sieci w Linuksie.
+
+## Pojęcia bazowe
+
+**Interfejs sieciowy** — logiczna reprezentacja karty sieciowej w systemie. Pierwsza karta
+Ethernet w starym nazewnictwie nazywała się `eth0`, druga `eth1`. W nowoczesnych dystrybucjach
+(systemd-udev *Predictable Network Interface Names*) nazwy są bardziej deterministyczne:
+`enp0s3`, `enp2s0f1`, `wlp3s0`.
+
+**MTU** (*Maximum Transmission Unit*) — maksymalny rozmiar pojedynczej ramki/pakietu, jaki interfejs
+może przesłać bez fragmentacji. Standard Ethernet to **1500 bajtów**. *Jumbo frames* (do 9000 B)
+używane są w storage networks (iSCSI, NFS) dla zmniejszenia narzutu nagłówków.
+
+**vi / vim** — modalny edytor tekstu obecny w każdym sensownym Linuksie. Warto znać podstawy
+(`i` insert, `Esc :wq` zapisz-i-wyjdź), bo w trybie recovery często to jedyne, co jest dostępne.
+
+## Klasyczny `ifconfig`
+
+```bash
+sudo apt install net-tools     # ifconfig nie jest już domyślnie instalowany
+ifconfig                       # status aktywnych interfejsów
+ifconfig -a                    # wszystkie interfejsy, także wyłączone
+ifconfig eth0                  # status pojedynczego interfejsu
+ifconfig eth0 up               # podnieś interfejs
+ifconfig eth0 down             # opuść interfejs
+```
+
+Przykładowy output `ifconfig`:
+
+```text title="ifconfig"
+eth0   Link encap:Ethernet  HWaddr 00:C0:DF:01:AE:3E
+       inet addr:192.168.1.1  Bcast:192.168.1.255  Mask:255.255.255.0
+       UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+       RX packets:169989 errors:0 dropped:0 overruns:0 frame:0
+       TX packets:166048 errors:0 dropped:0 overruns:0 carrier:0
+       RX bytes:22121102 (21.0 MiB)  TX bytes:169321645 (161.4 MiB)
+
+lo     Link encap:Local Loopback
+       inet addr:127.0.0.1  Mask:255.0.0.0
+       UP LOOPBACK RUNNING  MTU:16436  Metric:1
+```
+
+:::caution[ifconfig jest deprecated]
+W 2026 `ifconfig` jest **wycofany** na rzecz pakietu **iproute2** (`ip`, `ss`, `tc`).
+W większości nowych dystrybucji nie jest nawet instalowany domyślnie. Współczesne ekwiwalenty:
+
+```bash
+ip addr show              # = ifconfig -a
+ip link set eth0 up       # = ifconfig eth0 up
+ip route                  # = route -n
+ss -tuln                  # = netstat -tuln
+```
+
+`ifconfig` nie radzi sobie z multiple addresses per interface, IPv6 jest tam dorzucony niemrawo,
+parsowanie outputu jest tragiczne. Pakiet `iproute2` rozwiązuje wszystkie te problemy.
+:::
+
+## Załącznik
+
+<Image src={ifconfigOutput} alt="Output ifconfig" />

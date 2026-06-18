@@ -1,0 +1,101 @@
+---
+title: Konfiguracja hosta — DHCP
+description: ISC DHCP Server — instalacja, konfiguracja puli adresów, dzierżawa, rezerwacje.
+sidebar:
+  order: 8
+originalDate: '2019-10-25'
+originalTitle: 'T: Konfiguracja hosta'
+---
+
+import { Image } from 'astro:assets'
+import dhcp1 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-1.png'
+import dhcp2 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-2.png'
+import dhcp3 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-3.png'
+import dhcp4 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-4.png'
+import dhcp5 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-5.png'
+import dhcp6 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-6.png'
+import dhcp7 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-7.png'
+import dhcp8 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-8.png'
+import dhcp9 from '~/assets/lekcje/08-konfiguracja-hosta/dhcp-config-9.png'
+
+## Czym jest DHCP
+
+**DHCP** (*Dynamic Host Configuration Protocol*) — protokół przydzielania adresów IP i parametrów
+konfiguracji sieci klientom automatycznie. Klient łączy się z siecią, *dzierżawi* od serwera adres
+na zadeklarowany czas (*lease time*), po którym odnawia umowę lub zwalnia adres.
+
+Komputer-klient otrzymuje od serwera DHCP:
+
+- **adres IP** (z puli zarządzanej przez serwer)
+- **maskę podsieci**
+- **bramę domyślną** (gateway)
+- **adresy serwerów DNS**
+- **opcjonalne dodatki**: nazwa domeny, NTP, route'y statyczne, MTU
+
+Bez DHCP musielibyśmy konfigurować każdą maszynę ręcznie. W sieciach domowych DHCP zwykle
+biegnie na routerze; w sieciach firmowych — na dedykowanym serwerze (Windows Server, ISC DHCP,
+dnsmasq, Kea).
+
+## ISC DHCP Server na Ubuntu
+
+Pakiet `isc-dhcp-server` to klasyczna implementacja referencyjna od Internet Systems Consortium.
+
+```bash
+sudo apt install isc-dhcp-server
+```
+
+:::caution[ISC DHCP jest deprecated od 2022]
+ISC ogłosił **end-of-life dla ISC DHCP w 2022**. Następca:
+[**Kea DHCP**](https://www.isc.org/kea/) — modularny, API-driven, REST + JSON config.
+W 2026 nowe wdrożenia powinny używać Kea zamiast `isc-dhcp-server`.
+:::
+
+### Konfiguracja `/etc/dhcp/dhcpd.conf`
+
+```text title="/etc/dhcp/dhcpd.conf"
+default-lease-time 600;
+max-lease-time 7200;
+
+option domain-name "lab.local";
+option domain-name-servers 8.8.8.8, 1.1.1.1;
+
+subnet 10.10.10.0 netmask 255.255.255.0 {
+    range 10.10.10.100 10.10.10.200;
+    option routers 10.10.10.1;
+    option broadcast-address 10.10.10.255;
+}
+
+# Rezerwacja po MAC
+host laptop-szefa {
+    hardware ethernet 08:00:27:12:34:56;
+    fixed-address 10.10.10.50;
+}
+```
+
+### Interfejs nasłuchu — `/etc/default/isc-dhcp-server`
+
+```text
+INTERFACESv4="enp0s8"
+```
+
+### Uruchomienie
+
+```bash
+sudo systemctl enable --now isc-dhcp-server
+sudo systemctl status isc-dhcp-server
+journalctl -u isc-dhcp-server -f      # logi na żywo
+```
+
+Plik `/var/lib/dhcp/dhcpd.leases` zawiera aktualne dzierżawy.
+
+## Załączniki — konfiguracja w terminalu
+
+<Image src={dhcp1} alt="DHCP — konfiguracja 1" />
+<Image src={dhcp2} alt="DHCP — konfiguracja 2" />
+<Image src={dhcp3} alt="DHCP — konfiguracja 3" />
+<Image src={dhcp4} alt="DHCP — konfiguracja 4" />
+<Image src={dhcp5} alt="DHCP — konfiguracja 5" />
+<Image src={dhcp6} alt="DHCP — konfiguracja 6" />
+<Image src={dhcp7} alt="DHCP — konfiguracja 7" />
+<Image src={dhcp8} alt="DHCP — konfiguracja 8" />
+<Image src={dhcp9} alt="DHCP — konfiguracja 9" />

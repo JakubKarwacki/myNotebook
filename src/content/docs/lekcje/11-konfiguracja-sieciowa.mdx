@@ -1,0 +1,152 @@
+---
+title: DHCP i DNS — szczegóły protokołów
+description: Format nagłówka DHCP, sposoby przydzielania adresów, format komunikatu DNS, typy rekordów.
+sidebar:
+  order: 11
+originalDate: '2019-11-22'
+originalTitle: 'T: Konfiguracja sieciowa'
+---
+
+import { Image } from 'astro:assets'
+import dhcpDns1 from '~/assets/lekcje/11-konfiguracja-sieciowa/dhcp-dns-1.png'
+import dhcpDns2 from '~/assets/lekcje/11-konfiguracja-sieciowa/dhcp-dns-2.png'
+import dhcpDns3 from '~/assets/lekcje/11-konfiguracja-sieciowa/dhcp-dns-3.png'
+
+Najdłuższa lekcja semestru — głębsze wejście w DHCP (z [lekcji 8](/lekcje/08-konfiguracja-hosta/))
+i wprowadzenie do DNS.
+
+## DHCP — szczegóły protokołu
+
+### Sposoby przydzielania adresów
+
+Protokół DHCP (RFC 2131) opisuje trzy techniki:
+
+1. **Przydzielanie ręczne (statyczne)** — administrator wpisuje mapowanie MAC → IP w konfiguracji
+   serwera. Tylko zarejestrowane urządzenia dostaną adres.
+2. **Przydzielanie automatyczne** — serwer trzyma pulę i przydziela permanentnie pierwszemu
+   wolnemu klientowi.
+3. **Przydzielanie dynamiczne** (najczęstsze) — serwer wynajmuje adres na *lease time*. Po wygaśnięciu
+   adres wraca do puli. Klient próbuje odnowić dzierżawę zanim wygaśnie.
+
+### Format nagłówka DHCP
+
+DHCP działa nad UDP. Porty: serwer **67**, klient **68** (DHCPv6: 547 serwer, 546 klient).
+
+| Pole                              | Opis                                                              |
+| --------------------------------- | ----------------------------------------------------------------- |
+| Operacja                          | 1 = BOOTREQUEST, 2 = BOOTREPLY                                    |
+| Typ sprzętu                       | 1 dla Ethernet, inne wartości dla innych mediów                   |
+| Długość adresu sprzętowego        | 6 dla Ethernet (MAC)                                              |
+| Liczba skoków                     | Licznik routerów przekazujących pakiet (BOOTP relay)              |
+| Identyfikator transakcji (`xid`)  | Losowy ID generowany przez klienta — łączy zapytanie z odpowiedzią |
+| Liczba sekund                     | Czas od pierwszego BOOTREQUEST                                     |
+| Flagi                             | 1 bit BROADCAST + 15 zarezerwowanych                              |
+| Adres IP klienta                  | Wypełniane przy odświeżaniu adresu                                 |
+| Przydzielony adres IP klienta     | Co serwer proponuje                                                |
+| Adres IP serwera                  | Ustawiane przez serwer                                             |
+| Adres IP bramki (gateway)         | Ustawiane przez serwer                                             |
+| Adres sprzętowy klienta           | MAC                                                                |
+| Nazwa serwera, plik startowy      | Opcjonalne (PXE boot)                                              |
+| Opcje                             | 0-254 numerowanych opcji (DNS, NTP, route'y, MTU, ...)             |
+
+### Dodatkowe opcje DHCP
+
+Najczęściej spotykane wartości pola *Options*:
+
+- **3** — adres bramy (gateway)
+- **6** — adresy serwerów DNS
+- **15** — nazwa domeny
+- **51** — czas dzierżawy
+- **66** — adres TFTP (PXE boot)
+- **67** — nazwa pliku boot
+- **121** — Classless Static Route (route'y poza domyślną bramą)
+
+<Image src={dhcpDns1} alt="Format nagłówka DHCP" />
+
+## DNS — system nazw domen
+
+**DNS** (*Domain Name System*) — rozproszony, hierarchiczny system tłumaczący nazwy domen
+(np. `www.google.pl`) na adresy IP (np. `216.58.215.68`). Bez DNS prawie żadna usługa
+internetowa nie działa.
+
+Komunikacja: głównie **UDP port 53**. Większe odpowiedzi i transfer strefy między master/slave
+— **TCP port 53**. Każdy pakiet UDP standardowo do 512 oktetów (EDNS rozszerza do 4096 B);
+ponad ten próg DNS przechodzi na TCP.
+
+### Format komunikatu DNS
+
+<Image src={dhcpDns2} alt="Format nagłówka DNS" />
+
+Sekcja nagłówka ma 12 bajtów i zawiera flagi sterujące. Najważniejsze pola:
+
+- **ID [16 b]** — identyfikator zapytania (przepisywany do odpowiedzi)
+- **QR [1 b]** — 0 = zapytanie, 1 = odpowiedź
+- **OPCODE [4 b]** — rodzaj zapytania (0 = standardowe QUERY, 1 = IQUERY, 2 = STATUS)
+- **AA [1 b]** — *Authoritative Answer* — serwer jest autorytatywny dla tej strefy
+- **TC [1 b]** — *TrunCation* — odpowiedź obcięta (przejdź na TCP)
+- **RD [1 b]** — *Recursion Desired* — klient prosi o rekurencyjne rozwiązanie
+- **RA [1 b]** — *Recursion Available* — serwer wspiera rekurencję
+- **RCODE [4 b]** — kod odpowiedzi (0=OK, 1=błąd formatu, 2=server failure,
+  3=NXDOMAIN, 4=not implemented, 5=refused)
+- **QDCOUNT/ANCOUNT/NSCOUNT/ARCOUNT** — liczniki rekordów w sekcjach Question/Answer/Authority/Additional
+
+<Image src={dhcpDns3} alt="Sekcje pakietu DNS" />
+
+### Struktura nazw — drzewo domen
+
+Domeny tworzą **drzewiastą hierarchię**. Etykiety węzłów mają 1-63 znaki, oddzielone
+kropkami i czytane **od liścia do korzenia**:
+
+```
+www.example.com.
+└── www (host)
+    └── example (subdomena 2. poziomu)
+        └── com (TLD — Top-Level Domain)
+            └── . (root — zwykle pomijana w zapisie)
+```
+
+W polskim TLD `.pl` wyróżniamy:
+
+- **regionalne** — `warszawa.pl`, `krakow.pl`, `opole.pl`
+- **funkcjonalne** — `com.pl`, `gov.pl`, `org.pl`, `edu.pl`
+- **prywatne i firmowe** — `wikipedia.pl`, `allegro.pl`, `zus.pl`
+
+### Najważniejsze cechy systemu DNS
+
+- **Brak centralnej bazy** — 13 root server clusterów rozmieszczonych globalnie (Anycast,
+  fizycznie setki maszyn pod 13 logicznymi adresami)
+- **Cache'owanie** — serwery przechowują odpowiedzi przez czas określony w TTL rekordu
+- **Master/Slave replication** — każda strefa ma jeden master i ≥1 slave; zmiany propagują się
+  z mastera (NOTIFY + AXFR/IXFR transfer)
+- **Wiele rekordów na adres IP** — jeden adres może być wskazywany przez wiele nazw
+- **Wiele adresów na jedną nazwę** — round-robin DNS, *georouting*, *anycast*
+
+### Typy rekordów DNS
+
+| Typ      | Co robi                                                                  |
+| -------- | ------------------------------------------------------------------------ |
+| **A**    | Nazwa → adres IPv4                                                       |
+| **AAAA** | Nazwa → adres IPv6                                                       |
+| **CNAME**| Alias — nazwa → inna nazwa kanoniczna                                    |
+| **MX**   | Mail eXchange — serwer poczty dla domeny + priorytet                     |
+| **PTR**  | Reverse DNS — IP → nazwa (w domenie `in-addr.arpa` / `ip6.arpa`)         |
+| **NS**   | Name Server — który serwer DNS obsługuje tę domenę                       |
+| **SOA**  | Start Of Authority — autorytatywne info o strefie (master, refresh, TTL) |
+| **SRV**  | Service record — lokalizacja konkretnej usługi (np. SIP, LDAP, XMPP)     |
+| **TXT**  | Dowolny tekst — SPF, DKIM, weryfikacja własności (Google, Let's Encrypt) |
+| **CAA**  | Certificate Authority Authorization — które CA mogą wystawić cert        |
+
+:::tip[Praktyka]
+W 2026 narzędzia do inspekcji DNS:
+
+```bash
+dig example.com               # pełne info
+dig +short example.com        # tylko adresy
+dig @8.8.8.8 example.com MX   # zapytaj konkretnego serwera o konkretny typ rekordu
+host example.com              # uproszczona wersja dig
+nslookup example.com          # legacy, ale wciąż popularne
+```
+
+DoH (DNS over HTTPS) i DoT (DNS over TLS) są dziś standardem dla privacy — `1.1.1.1`
+od Cloudflare i `8.8.8.8` od Google wspierają oba.
+:::

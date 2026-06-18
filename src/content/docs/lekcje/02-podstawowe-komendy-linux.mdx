@@ -1,0 +1,125 @@
+---
+title: Podstawowe komendy Linuksa
+description: Drzewo katalogów Linuksa, nawigacja po systemie plików i polecenia inspekcji sprzętu (lspci, lsusb, cat /proc/*).
+sidebar:
+  order: 2
+originalDate: '2019-09-13'
+originalTitle: 'T: Podstawowe komendy linux'
+---
+
+import { Image } from 'astro:assets'
+import fileTree1 from '~/assets/lekcje/02-podstawowe-komendy-linux/file-tree-1.png'
+import fileTree2 from '~/assets/lekcje/02-podstawowe-komendy-linux/file-tree-2.png'
+import fileTree3 from '~/assets/lekcje/02-podstawowe-komendy-linux/file-tree-3.png'
+import fileTree4 from '~/assets/lekcje/02-podstawowe-komendy-linux/file-tree-4.png'
+import fileTree5 from '~/assets/lekcje/02-podstawowe-komendy-linux/file-tree-5.png'
+import fileTree6 from '~/assets/lekcje/02-podstawowe-komendy-linux/file-tree-6.png'
+
+## Drzewo katalogów
+
+Linux trzyma się standardu [FHS](https://refspecs.linuxfoundation.org/fhs.shtml) — *Filesystem Hierarchy Standard*.
+Najważniejsze katalogi systemowe:
+
+| Katalog | Zawartość                                                          |
+| ------- | ------------------------------------------------------------------ |
+| `/bin`  | Podstawowe pliki wykonywalne (cp, ls, mv) — dostępne dla wszystkich |
+| `/sbin` | Systemowe binarne, zwykle wymagają root (fdisk, mkfs)              |
+| `/usr`  | Programy i dane użytkownika (kolekcja podobna do `/`)              |
+| `/etc`  | Pliki konfiguracyjne                                                |
+| `/var`  | Dane zmienne — logi, pliki pocztowe, kolejki drukarki              |
+| `/tmp`  | Pliki tymczasowe (czyszczone przy reboot)                          |
+| `/srv`  | Dane serwowane przez usługi (www, ftp)                             |
+| `/sys`  | Wirtualny FS — interfejs do urządzeń i jądra (sysfs)               |
+| `/proc` | Wirtualny FS — informacje o procesach i kernel runtime             |
+| `/home` | Katalogi domowe użytkowników                                        |
+| `/root` | Katalog domowy użytkownika root                                     |
+| `/dev`  | Pliki specjalne reprezentujące urządzenia                           |
+| `/boot` | Jądro i bootloader (GRUB)                                          |
+
+## Nawigacja i operacje na plikach
+
+```bash
+cd /etc/nginx        # przejście do konkretnego katalogu
+cd                   # powrót do $HOME
+ls -lah              # długi listing + ukryte pliki + size human-readable
+cat plik.txt         # wypisz zawartość
+gedit plik.txt       # graficzny edytor tekstu (GNOME)
+nano plik.txt        # prosty TUI edytor
+```
+
+## Inspekcja sprzętu
+
+Komendy diagnostyczne — pokazują, co dystrybucja wie o sprzęcie maszyny.
+
+### `lspci` — urządzenia PCI
+
+```text title="lspci (Ubuntu w VirtualBox)"
+00:00.0 Host bridge: Intel Corporation 440FX - 82441FX PMC [Natoma] (rev 02)
+00:01.0 ISA bridge: Intel Corporation 82371SB PIIX3 ISA [Natoma/Triton II]
+00:01.1 IDE interface: Intel Corporation 82371AB/EB/MB PIIX4 IDE (rev 01)
+00:02.0 VGA compatible controller: InnoTek Systemberatung GmbH VirtualBox Graphics Adapter
+00:03.0 Ethernet controller: Intel Corporation 82540EM Gigabit Ethernet Controller (rev 02)
+00:05.0 Multimedia audio controller: Intel Corporation 82801AA AC'97 Audio Controller (rev 01)
+00:06.0 USB controller: Apple Inc. KeyLargo/Intrepid USB
+00:0d.0 SATA controller: Intel Corporation 82801HM/HEM (ICH8M/ICH8M-E) SATA Controller
+```
+
+### `lsusb` — urządzenia USB
+
+```text title="lsusb"
+Bus 001 Device 002: ID 80ee:0021 VirtualBox USB Tablet
+Bus 001 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
+```
+
+### `id` — bieżący użytkownik, grupy
+
+```text title="id"
+uid=1000(uczen) gid=1000(uczen) groups=1000(uczen),4(adm),24(cdrom),27(sudo),
+30(dip),46(plugdev),113(lpadmin),128(sambashare)
+```
+
+### `cat /proc/cpuinfo` — informacje o CPU
+
+```text title="cat /proc/cpuinfo (fragment)"
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 6
+model           : 58
+model name      : Intel(R) Core(TM) i3-3110M CPU @ 2.40GHz
+cache size      : 3072 KB
+cpu cores       : 1
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca
+                  cmov pat pse36 clflush mmx fxsr sse sse2 nx rdtscp ...
+bogomips        : 4789.12
+```
+
+### `cat /proc/meminfo` — informacje o pamięci
+
+```text title="cat /proc/meminfo (fragment)"
+MemTotal:        1023248 kB
+MemFree:          135460 kB
+MemAvailable:     354044 kB
+Buffers:           26556 kB
+Cached:           319576 kB
+SwapTotal:       1046524 kB
+SwapFree:        1046524 kB
+HugePages_Total:       0
+Hugepagesize:       2048 kB
+```
+
+:::tip[Nowoczesne narzędzia]
+W 2026 zamiast surowych `/proc/*` ludzie częściej sięgają po:
+- `lscpu` — sformatowany podgląd CPU
+- `free -h` — pamięć w human-readable
+- `lshw` / `inxi -F` — pełny inwentarz sprzętu
+- `lsblk` — drzewo urządzeń blokowych
+:::
+
+## Załączniki — drzewo plików w terminalu
+
+<Image src={fileTree1} alt="Drzewo plików — widok 1" />
+<Image src={fileTree2} alt="Drzewo plików — widok 2" />
+<Image src={fileTree3} alt="Drzewo plików — widok 3" />
+<Image src={fileTree4} alt="Drzewo plików — widok 4" />
+<Image src={fileTree5} alt="Drzewo plików — widok 5" />
+<Image src={fileTree6} alt="Drzewo plików — widok 6" />

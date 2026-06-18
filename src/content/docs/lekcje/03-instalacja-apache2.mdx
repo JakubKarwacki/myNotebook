@@ -1,0 +1,92 @@
+---
+title: Instalacja Apache2
+description: Instalacja serwera Apache HTTP, podstawowa konfiguracja i kontekst historyczny.
+sidebar:
+  order: 3
+originalDate: '2019-09-20'
+originalTitle: 'T: Instalacja Apache2'
+---
+
+import { Image } from 'astro:assets'
+import apache1 from '~/assets/lekcje/03-instalacja-apache2/apache-1.png'
+import apache2 from '~/assets/lekcje/03-instalacja-apache2/apache-2.png'
+import apache3 from '~/assets/lekcje/03-instalacja-apache2/apache-3.png'
+
+## Pomocnicze komendy
+
+```bash
+man <komenda>     # strona pomocy systemowej
+head plik         # pierwsze 10 linii pliku
+tail plik         # ostatnie 10 linii
+tail -f /var/log/syslog   # follow — pokazuj nowe linie na żywo
+sed 'expression'  # stream editor (zamiana tekstu w pipe)
+```
+
+## Instalacja Apache2
+
+```bash
+sudo apt update
+sudo apt install apache2
+sudo systemctl enable --now apache2
+```
+
+Po instalacji serwer odpowiada na `http://localhost/` z domyślną stroną *It works!*. Domyślne ścieżki:
+
+| Ścieżka                  | Co tam jest                          |
+| ------------------------ | ------------------------------------ |
+| `/etc/apache2/`          | Konfiguracja                          |
+| `/etc/apache2/apache2.conf` | Główny plik konfiguracyjny         |
+| `/etc/apache2/sites-available/` | Definicje VirtualHosts        |
+| `/etc/apache2/sites-enabled/`   | Symlinki do aktywnych sajtów  |
+| `/var/www/html/`         | Domyślny `DocumentRoot`              |
+| `/var/log/apache2/`      | Access log + error log               |
+
+## Co to jest Apache?
+
+**Apache HTTP Server** — open-source serwer WWW utrzymywany przez Apache Software Foundation,
+działający na Linuksie, BSD, macOS, Windows. Najstarszy z popularnych serwerów: pierwsza wersja
+(1.0) w grudniu 1995, oparta na kodzie NCSA HTTPd Roba McCoola.
+
+W szczytowym okresie (2015) trzymał ~37 % udziału w rynku serwerów WWW. W 2026 Nginx i serwery
+napisane w Go/Rust (Caddy, Traefik) przejęły większość tortu, ale Apache wciąż jest **standardem
+w hostingach współdzielonych** dzięki `.htaccess` (per-katalog konfiguracja).
+
+Klasyczny stack **LAMP** (Linux + Apache + MySQL + PHP) to historycznie najczęstsze środowisko
+do hostowania PHP-owych CMS-ów (WordPress, Drupal).
+
+### Moduły Apache
+
+Apache jest modularny — większość funkcji działa przez ładowane moduły:
+
+- `mod_proxy` / `mod_proxy_http` — proxy HTTP, FTP, CONNECT
+- `mod_rewrite` — przepisywanie URL-i (na bazie regex)
+- `mod_ssl` — TLS/HTTPS
+- `mod_authz_*` — kontrola dostępu i uwierzytelnianie
+- `mod_include` — Server Side Includes
+- `mod_negotiation` — Content Negotiation
+- `mod_php` / `mod_perl` / `mod_python` — osadzone interpretery
+
+```bash
+sudo a2enmod rewrite ssl     # włącz moduły
+sudo a2dismod php8.1         # wyłącz moduł
+sudo systemctl reload apache2
+```
+
+## Adresacja IP — co to jest?
+
+W oryginale tu pojawił się długi blok o **IPAM** (IP Address Management) — system planowania
+i śledzenia adresów IP w sieci. W 2026 IPAM to głównie domena enterprise (rozwiązania jak
+phpIPAM, NetBox, Infoblox). W sieci domowej wystarczy router z DHCP; w infra-as-code (Terraform)
+adresacja IP jest deklarowana w plikach i wersjonowana razem z kodem infrastruktury.
+
+Pełne IPAM staje się ważne, gdy:
+
+- Mamy sieci IPv6 — 128-bitowe adresy są nieczytelne dla człowieka
+- Mamy multi-tenancy (VPC w chmurze, segmentacja sieci klienckich)
+- Mamy compliance audytujący przydziały adresów
+
+## Załączniki
+
+<Image src={apache1} alt="Apache2 — widok 1" />
+<Image src={apache2} alt="Apache2 — widok 2" />
+<Image src={apache3} alt="Apache2 — widok 3" />

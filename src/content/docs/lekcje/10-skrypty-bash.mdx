@@ -1,0 +1,81 @@
+---
+title: Tworzenie skryptów w Bashu — kartkówka
+description: Praktyczny skrypt case wyjaśniający 7 najczęstszych komend Linuksa (mkdir, ls, apt, man, sudo, chmod, touch).
+sidebar:
+  order: 10
+originalDate: '2019-11-15'
+originalTitle: 'T: Tworzenie skryptów w powłoce Bash'
+---
+
+> **O tej lekcji.** W oryginale była to **kartkówka** — skrypt Bash z instrukcją `case` opisujący
+> 7 najczęściej używanych komend w Linuksie. Format zachowuję; opisy komend są przepisane na
+> zwięzły, profesjonalny ton (oryginał był utrzymany w długim, niesformatowanym stylu nauki na pamięć).
+
+## Skrypt — opisy komend wybieranych przez `case`
+
+```bash title="komendy.sh"
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Wybierz komendę: 1-mkdir, 2-ls, 3-apt install, 4-man, 5-sudo, 6-chmod, 7-touch"
+read -r d
+
+case "$d" in
+    1) echo "mkdir — tworzy nowy katalog w bieżącej lokalizacji.
+       Składnia: mkdir <nazwa>. Opcja -p tworzy całe drzewo (mkdir -p a/b/c).
+       Aby utworzyć katalog w innym miejscu, podaj pełną ścieżkę." ;;
+
+    2) echo "ls — wyświetla zawartość katalogu.
+       Najczęstsze flagi: -l (długi format), -a (ukryte pliki), -h (rozmiary human-readable),
+       -t (sortuj wg czasu modyfikacji), -S (sortuj wg rozmiaru).
+       Pełna dokumentacja: man ls lub ls --help." ;;
+
+    3) echo "apt install — instaluje pakiet z repozytorium dystrybucji.
+       Składnia: sudo apt install <pakiet>. Wymaga uprawnień root (stąd sudo).
+       Przed instalacją warto: sudo apt update (odświeżenie listy pakietów).
+       Przykład: sudo apt install nginx git curl" ;;
+
+    4) echo "man — wyświetla stronę pomocy systemowej (manpage).
+       Składnia: man <komenda>. Nawigacja: spacja = strona w dół, q = wyjście, / = szukaj.
+       Sekcje manpages: 1 (komendy), 2 (syscalls), 3 (funkcje C), 5 (formaty plików).
+       Meta-tip: man man — strona o samym poleceniu man." ;;
+
+    5) echo "sudo — wykonuje pojedyncze polecenie z uprawnieniami innego użytkownika (domyślnie root).
+       Wymaga hasła użytkownika wywołującego (nie roota). Hasło cache'owane ~15 minut.
+       Konfiguracja: /etc/sudoers (edytuj WYŁĄCZNIE przez visudo).
+       Trick: sudo !! powtarza poprzednią komendę z sudo." ;;
+
+    6) echo "chmod — modyfikuje uprawnienia pliku.
+       Tryb oktalny: chmod 755 plik (rwx r-x r-x = właściciel, grupa, reszta).
+       Cyfry: 7=rwx (read+write+exec), 6=rw-, 5=r-x, 4=r--, 0=---.
+       Tryb symboliczny: chmod u+x plik (dodaj exec dla właściciela).
+       Typowe: 755 (skrypt), 644 (plik tekstowy), 600 (sekret), 700 (katalog prywatny)." ;;
+
+    7) echo "touch — tworzy pusty plik LUB aktualizuje znacznik czasu istniejącego.
+       Składnia: touch <nazwa>. Działa też z wieloma plikami naraz.
+       Wymaga uprawnień zapisu w katalogu (sudo touch /etc/X dla systemowych).
+       Często: touch .placeholder żeby commit pusty katalog do git." ;;
+
+    *) echo "Wybierz poprawny numer (1-7)" >&2
+       exit 1 ;;
+esac
+```
+
+## Uruchomienie
+
+```bash
+chmod +x komendy.sh
+./komendy.sh
+```
+
+## Co się tu dzieje
+
+Skrypt łączy wszystko z [lekcji 9](/lekcje/09-poznanie-bash/):
+
+- **shebang** `#!/usr/bin/env bash` — wybiera interpreter z PATH (bardziej portable niż `/bin/bash`)
+- **`set -euo pipefail`** — *strict mode* dla Basha. Skrypt kończy się przy pierwszym błędzie,
+  przy nieuprawnionym dostępie do zmiennej, i wykrywa błędy w środku pipeline'u
+- **`read -r`** — czyta linię ze stdin (`-r` wyłącza interpretację `\` jako escape)
+- **`case`** — dopasowanie do wzorca z lekcji 9
+- **`>&2`** — przekierowanie outputu na stderr (poprawna praktyka dla komunikatów błędów)
+- **`exit 1`** — niezerowy exit code sygnalizuje błąd do procesu wywołującego
